@@ -37,10 +37,10 @@ export function getCookie(request: Request, name: string): string | null {
   return null;
 }
 export function sessionCookie(value: string, maxAge: number): string {
-  return `pp_session=${value}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${maxAge}`;
+  return `pp_session=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
 }
 export function clearSessionCookie(): string {
-  return "pp_session=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0";
+  return "pp_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
 }
 export function validSameOrigin(request: Request): boolean {
   const origin = request.headers.get("Origin");

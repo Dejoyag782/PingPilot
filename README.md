@@ -4,7 +4,7 @@ A single-administrator URL monitor built with Cloudflare Workers, D1, React, Vit
 
 ## Features
 
-- Secure administrator login with PBKDF2 password hashing and HttpOnly, Secure, SameSite=Strict session cookie.
+- Secure administrator login with PBKDF2 password hashing and HttpOnly, Secure, SameSite=Lax session cookie.
 - D1-backed targets, sessions, and execution logs.
 - Scheduled HTTP GET checks with preset intervals: 1, 5, 15, 30, and 60 minutes.
 - Manual "Ping now", pause/resume, delete, status, latency and execution history.

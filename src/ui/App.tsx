@@ -9,6 +9,7 @@ async function api<T = any>(path:string, options:RequestInit={}): Promise<T> {
   const res = await fetch(path,{...options,credentials:"same-origin",headers:{"content-type":"application/json",...(options.headers||{})}});
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: any = await res.json().catch(()=>({}));
+  if(res.status===401 && !path.startsWith("/api/auth/")) window.dispatchEvent(new Event("pp:unauthorized"));
   if(!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
   return data;
 }
@@ -38,13 +39,20 @@ export default function App() {
     const [t,d,l] = await Promise.all([api("/api/targets"),api("/api/dashboard"),api("/api/logs?limit=100")]);
     setTargets(t.targets); setStats(d.totals); setLogs(l.logs);
   }
+  useEffect(()=>{ const onUnauth=()=>{ setAuthenticated(false); setLoginError("Your session expired or was not saved. Please sign in again."); }; window.addEventListener("pp:unauthorized",onUnauth); return ()=>window.removeEventListener("pp:unauthorized",onUnauth); },[]);
   useEffect(()=>{ api("/api/auth/me").then(()=>setAuthenticated(true)).catch(()=>setAuthenticated(false)); },[]);
   useEffect(()=>{ if(authenticated){ refresh().catch(e=>setToast(e.message)); } },[authenticated]);
   const filteredLogs = useMemo(()=>filter==="all"?logs:logs.filter(l=>String(l.target_id)===filter),[logs,filter]);
 
   async function login(e:React.FormEvent) {
     e.preventDefault(); setLoginError("");
-    try { await api("/api/auth/login",{method:"POST",body:JSON.stringify({username,password})}); setAuthenticated(true); setPassword(""); }
+    try {
+      await api("/api/auth/login",{method:"POST",body:JSON.stringify({username,password})});
+      // Confirm the browser kept the session cookie; some mobile/in-app browsers silently drop it.
+      try { await api("/api/auth/me"); }
+      catch { setLoginError("Signed in, but this browser blocked the session cookie. Allow cookies for this site or open it in Chrome/Safari (not an in-app browser)."); return; }
+      setAuthenticated(true); setPassword("");
+    }
     catch(e){setLoginError(e instanceof Error?e.message:"Login failed");}
   }
   async function logout() { await api("/api/auth/logout",{method:"POST",body:"{}"}); setAuthenticated(false); setTargets([]); setLogs([]); }
