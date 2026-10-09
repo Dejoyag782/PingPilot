@@ -1,0 +1,24 @@
+name = "pingpilot"
+main = "src/worker/index.ts"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[triggers]
+crons = ["* * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "pingpilot-db"
+database_id = "PLACE_YOUR_D1_DB_ID_HERE"
+migrations_dir = "migrations"
+
+[vars]
+APP_NAME = "PingPilot"
+SESSION_TTL_SECONDS = "604800"
+MAX_TARGETS = "100"
+MAX_PINGS_PER_TICK = "20"
